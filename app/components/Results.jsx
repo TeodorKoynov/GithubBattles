@@ -1,10 +1,9 @@
 import * as React from "react";
-import {useEffect, useReducer, useState} from "react";
+import {useEffect, useReducer} from "react";
 import {Link, useSearchParams} from "react-router-dom";
 import PropTypes from "prop-types";
 import {battle} from "../utils/api";
 import Loading from "./Loading";
-
 
 function Card({profile}) {
     const {
