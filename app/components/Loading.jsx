@@ -1,5 +1,6 @@
 import * as React from "react";
 import PropTypes from "prop-types";
+import {useEffect, useRef, useState} from "react";
 
 const styles = {
     fontSize: "14px",
@@ -10,67 +11,103 @@ const styles = {
     textAlign: "center",
 };
 
-class Delayed extends React.Component {
-    state = {
-        show: false,
-    }
-    componentDidMount() {
-        this.timeout = window.setTimeout(() => {
-            this.setState({show: true})
-        }, this.props.wait)
-    }
-    componentWillUnmount() {
-        window.clearInterval(this.timeout)
-    }
+function Delayed({wait = 4000, children}) {
+    const [show, setShow] = useState(false);
+    const timerId = useRef();
 
-    render() {
-        return this.state.show === true ? this.props.children : null
-    }
+    useEffect(() => {
+        timerId.current = setTimeout(() => {
+            setShow(true);
+        }, wait)
+
+        return clearInterval(timerId.current);
+    }, [])
+
+    return (
+        show ? children : null
+    )
 }
 
-Delayed.defaultProps = {
-    wait: 400
-}
+// class Delayed extends React.Component {
+//     state = {
+//         show: false,
+//     }
+//     componentDidMount() {
+//         this.timeout = window.setTimeout(() => {
+//             this.setState({show: true})
+//         }, this.props.wait)
+//     }
+//     componentWillUnmount() {
+//         window.clearInterval(this.timeout)
+//     }
+//
+//     render() {
+//         return this.state.show === true ? this.props.children : null
+//     }
+// }
+//
+// Delayed.defaultProps = {
+//     wait: 400
+// }
 
 Delayed.propTypes = {
     children: PropTypes.node.isRequired,
     wait: PropTypes.number
 }
 
-export default class Loading extends React.Component {
-    state = {
-        content: this.props.text
-    }
+export default function Loading({text = 'Loading', speed = 3000}) {
+    const [content, setContent] = useState(text);
+    const intervalId = useRef();
 
-    componentDidMount() {
-        const {speed, text} = this.props;
-
-        this.interval = window.setInterval(() => {
-            this.state.content === text + "..."
-                ? this.setState({context: text})
-                : this.setState(({content}) => ({content: content + "."}));
+    useEffect(() => {
+        intervalId.current = setInterval(() => {
+            const newContent = content === text + '...' ? text : content + '.'
+            setContent(newContent);
         }, speed)
-    }
 
-    componentWillUnmount() {
-        window.clearInterval(this.interval)
-    }
+        return clearInterval(intervalId.current);
+    }, [])
 
-    render() {
-        return (
-            <Delayed>
-                <p style={styles}>{this.state.content}</p>
-            </Delayed>
-        )
-    }
+    return (
+        <Delayed>
+            <p style={styles}>{content}</p>
+        </Delayed>
+    )
 }
+// export default class Loading extends React.Component {
+//     state = {
+//         content: this.props.text
+//     }
+//
+//     componentDidMount() {
+//         const {speed, text} = this.props;
+//
+//         this.interval = window.setInterval(() => {
+//             this.state.content === text + "..."
+//                 ? this.setState({context: text})
+//                 : this.setState(({content}) => ({content: content + "."}));
+//         }, speed)
+//     }
+//
+//     componentWillUnmount() {
+//         window.clearInterval(this.interval)
+//     }
+//
+//     render() {
+//         return (
+//             <Delayed>
+//                 <p style={styles}>{this.state.content}</p>
+//             </Delayed>
+//         )
+//     }
+// }
 
-Loading.propTypes = {
-    text: PropTypes.string.isRequired,
-    speed: PropTypes.number.isRequired,
-};
+// Loading.propTypes = {
+//     text: PropTypes.string.isRequired,
+//     speed: PropTypes.number.isRequired,
+// };
 
-Loading.defaultProps = {
-    text: 'Loading',
-    speed: 300,
-};
+// Loading.defaultProps = {
+//     text: 'Loading',
+//     speed: 300,
+// };
