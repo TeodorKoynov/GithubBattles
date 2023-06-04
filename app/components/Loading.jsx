@@ -13,14 +13,13 @@ const styles = {
 
 function Delayed({wait = 400, children}) {
     const [show, setShow] = useState(false);
-    const timerId = useRef();
 
     useEffect(() => {
-        timerId.current = setTimeout(() => {
+        const timerId = setTimeout(() => {
             setShow(true);
         }, wait)
 
-        return clearInterval(timerId.current);
+        return clearInterval(timerId);
     }, [])
 
     return (
@@ -35,14 +34,13 @@ Delayed.propTypes = {
 
 export default function Loading({text = 'Loading', speed = 300}) {
     const [content, setContent] = useState(text);
-    const intervalId = useRef();
 
     useEffect(() => {
-        intervalId.current = setInterval(() => {
+        const intervalId = setInterval(() => {
             setContent((content) => content === `${text}...` ? text : `${content}.`);
         }, speed)
 
-        return clearInterval(intervalId.current);
+        return clearInterval(intervalId);
     }, [])
 
     return (
