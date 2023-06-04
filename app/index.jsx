@@ -12,7 +12,7 @@ const Results = React.lazy(() => import("./components/Results"));
 import "./index.css";
 import {useState} from "react";
 
-export default function App() {
+function App() {
     const [theme, setTheme] = useState('light');
 
     const toggleTheme = () => {
@@ -36,36 +36,6 @@ export default function App() {
         </Router>
     )
 }
-
-// class App extends React.Component {
-//     state = {
-//         theme: "light"
-//     }
-//     toggleTheme = () => {
-//         this.setState(({theme}) => ({
-//             theme: theme === "light" ? "dark" : "light"
-//         }));
-//     }
-//
-//     render() {
-//         return (
-//             <Router>
-//                 <div className={this.state.theme}>
-//                     <div className={"container"}>
-//                         <Nav theme={this.state.theme} toggleTheme={this.toggleTheme}/>
-//                         <React.Suspense fallback={<Loading/>}>
-//                             <Routes>
-//                                 <Route path={'/'} element={<Popular/>}/>
-//                                 <Route path={'/battle'} element={<Battle/>}/>
-//                                 <Route path={'/results'} element={<Results/>}/>
-//                             </Routes>
-//                         </React.Suspense>
-//                     </div>
-//                 </div>
-//             </Router>
-//         );
-//     }
-// }
 
 const rootElement = document.getElementById('app');
 const root = ReactDOM.createRoot(rootElement);

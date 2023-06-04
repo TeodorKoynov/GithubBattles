@@ -1,10 +1,10 @@
 import * as React from "react";
-import {battle} from "../utils/api";
+import {useEffect, useReducer, useState} from "react";
+import {Link, useSearchParams} from "react-router-dom";
 import PropTypes from "prop-types";
+import {battle} from "../utils/api";
 import Loading from "./Loading";
-import withSearchParams from "./withSearchParams";
-import {Link} from "react-router-dom";
-import {useEffect, useState} from "react";
+
 
 function Card({profile}) {
     const {
@@ -67,27 +67,51 @@ Card.propTypes = {
     }).isRequired,
 };
 
-function Results({router}) {
-    const [winner, setWinner] = useState(null);
-    const [loser, setLoser] = useState(null);
-    const [error, setError] = useState(null);
-    const [loading, setLoading] = useState(true);
+function battleReducer(state, action) {
+    if (action.type === 'success') {
+        return {
+            winner: action.winner,
+            loser: action.loser,
+            error: null,
+            loading: false,
+        }
+    } else if (action.type === 'error') {
+        return {
+            ...state,
+            error: action.message,
+            loading: false,
+        }
+    } else {
+        throw new Error('This type of Action isn\'t supported!')
+    }
+}
+
+export default function Results({router}) {
+    const [state, dispatch] = useReducer(
+        battleReducer,
+        {
+            winner: null,
+            loser: null,
+            error: null,
+            loading: true,
+        }
+    )
+
+    const [searchParams] = useSearchParams();
 
     useEffect(() => {
-        const sp = router.searchParams;
-        const playerOne = sp.get('playerOne');
-        const playerTwo = sp.get('playerTwo');
+        const playerOne = searchParams.get('playerOne');
+        const playerTwo = searchParams.get('playerTwo');
 
-        battle([playerOne, playerTwo]).then((players) => {
-            setWinner(players[0]);
-            setLoser(players[1]);
-            setError(null);
-            setLoading(false);
-        }).catch(({message}) => {
-            setError(message);
-            setLoading(false);
-        })
+        battle([playerOne, playerTwo]).then((players) => dispatch({
+                type: 'success',
+                winner: players[0],
+                loser: players[1]
+            })
+        ).catch(({message}) => dispatch({type: 'error', message}))
     }, [])
+
+    const { winner, loser, loading, error } = state;
 
     if (loading === true) {
         return <Loading text={"Battling"} speed={300}/>
@@ -135,84 +159,3 @@ function Results({router}) {
         </main>
     )
 }
-
-// class Results extends React.Component {
-//     state = {
-//         winner: null,
-//         loser: null,
-//         error: null,
-//         loading: true,
-//     }
-//
-//     componentDidMount() {
-//         const sp = this.props.router.searchParams;
-//         const playerOne = sp.get('playerOne');
-//         const playerTwo = sp.get('playerTwo');
-//
-//         battle([playerOne, playerTwo]).then((players) => {
-//             this.setState({
-//                 winner: players[0],
-//                 loser: players[1],
-//                 error: null,
-//                 loading: false,
-//             })
-//         }).catch(({message}) => {
-//             this.setState({
-//                 error: message,
-//                 loading: false,
-//             })
-//         })
-//     }
-//
-//     render() {
-//         const {winner, loser, error, loading} = this.state;
-//
-//         if (loading === true) {
-//             return <Loading text={"Battling"} speed={300}/>
-//         }
-//
-//         if (error) {
-//             return <p className={"text-center error"}>{error}</p>
-//         }
-//
-//         return (
-//             <main className={"animate-in stack main-stack"}>
-//                 <div className={"split"}>
-//                     <h1>Results</h1>
-//                     <Link to={"/battle"} className={"btn secondary"}>
-//                         Reset
-//                     </Link>
-//                 </div>
-//                 <section className={"grid"}>
-//                     <article className={"results-container"}>
-//                         <Card profile={winner.profile}/>
-//                         <p className={"results"}>
-//                             <span>
-//                                 {winner.score === loser.score ? "Tie " : "Winner "}
-//                                 {winner.score.toLocaleString()}
-//                             </span>
-//                             {winner.score !== loser.score && (
-//                                 <img
-//                                     width={80}
-//                                     src={"https://ui.dev/images/certificate.svg"}
-//                                     alt={"Certificate"}
-//                                 />
-//                             )}
-//                         </p>
-//                     </article>
-//                     <article className={"results-container"}>
-//                         <Card profile={loser.profile}/>
-//                         <p className={"results"}>
-//                             <span>
-//                                 {winner.score === loser.score ? "Tie " : "Loser "}
-//                                 {loser.score.toLocaleString()}
-//                             </span>
-//                         </p>
-//                     </article>
-//                 </section>
-//             </main>
-//         )
-//     }
-// }
-
-export default withSearchParams(Results);
