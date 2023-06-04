@@ -1,7 +1,8 @@
 import * as React from "react";
 import PropTypes from "prop-types";
-import {hashtag} from "./icons";
 import Tooltip from "./Tooltip";
+
+import {hashtag} from "./icons";
 
 function MoreInfo({
                       created_at,
